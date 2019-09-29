@@ -208,8 +208,29 @@ int parse_variant(VARIANT* variant, char* buffer, int samplecol) {
             return 0;
         }
     } else {
-        fprintf(stdout, "\nERROR: Non-diploid VCF entry detected. Each VCF entry must have a diploid genotype (GT) field consisting of two alleles in the set {0,1,2} separated by either \'/\' or \'|\'. For example, \"1/1\", \"0/1\", and \"0|2\" are valid diploid genotypes for HapCUT2, but \"1\", \"0/3\", and \"0/0/1\" are not.\nThe invalid entry is: \n\n%s\n", buffer);
-        exit(1);
+        //fprintf(stdout, "\nERROR: Non-diploid VCF entry detected. Each VCF entry must have a diploid genotype (GT) field consisting of two alleles in the set {0,1,2} separated by either \'/\' or \'|\'. For example, \"1/1\", \"0/1\", and \"0|2\" are valid diploid genotypes for HapCUT2, but \"1\", \"0/3\", and \"0/0/1\" are not.\nThe invalid entry is: \n\n%s\n", buffer);
+        //exit(1);
+
+
+	// This is a preliminary version for polyploid. without any check. no indel handling. all variant in vcf file should be heterzygous and one nt snp. 
+	variant->allele1 = (char*) malloc(strlen(variant->RA) + 1);
+        strcpy(variant->allele1, variant->RA);
+        j = 0;
+        while (variant->AA[j] != ',' && j < strlen(variant->AA)) j++;
+        k = j + 1;
+        while (variant->AA[k] != ',' && k < strlen(variant->AA)) k++;
+        variant->allele2 = (char*) malloc(k - j + 1);
+        for (i = j + 1; i < k; i++) variant->allele2[i - j - 1] = variant->AA[i];
+        variant->allele2[i - j - 1] = '\0';
+        //variant->type = strlen(variant->allele2) - strlen(variant->allele1);
+        //fprintf(stdout, " pos %d\n", variant->position);
+	 variant->heterozygous = '1';
+	 variant->type = 0;
+        return 1;
+
+
+
+
     }
         //free(variant->genotype); free(variant->AA); free(variant->RA); free(variant->chrom);
 }
